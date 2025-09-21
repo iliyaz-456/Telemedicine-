@@ -4,7 +4,8 @@ import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Heart, User, Phone, FileText } from 'lucide-react';
+import { Calendar, Clock, Heart, User, Phone, FileText, Pill, Search, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 function PatientDashboard() {
   const { user, logout } = useAuth();
@@ -47,7 +48,9 @@ function PatientDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Book Now</Button>
+              <Button className="w-full" asChild>
+                <Link href="/book">Book Now</Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -77,7 +80,26 @@ function PatientDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">View Records</Button>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/medical-records">View Records</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <Pill className="w-5 h-5 mr-2 text-green-600" />
+                Medicine Tracker
+              </CardTitle>
+              <CardDescription>
+                Search medicines and check availability
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/medicine-tracker">Track Medicines</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

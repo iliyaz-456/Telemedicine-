@@ -82,8 +82,8 @@ export default function AshaHeroesSection() {
               })}
             </div>
 
-            <Button size="lg" className="animate-glow">
-              Join as an ASHA Worker
+            <Button size="lg" className="animate-glow" asChild>
+              <a href="/signup/asha-worker">Join as an ASHA Worker</a>
             </Button>
           </div>
         </div>

@@ -4,7 +4,8 @@ import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Phone, Users, User, Heart, FileText, Video, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, Users, User, Heart, FileText, Video, AlertCircle, Pill, Activity } from 'lucide-react';
+import Link from 'next/link';
 
 function WorkerDashboard() {
   const { user, logout } = useAuth();
@@ -128,7 +129,43 @@ function WorkerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">Manage Records</Button>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/dashboard/worker/health-records">Manage Records</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <Pill className="w-5 h-5 mr-2 text-green-600" />
+                Medicine Management
+              </CardTitle>
+              <CardDescription>
+                Manage patient medicine requests and track availability
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/dashboard/worker/medicine-management">Manage Medicines</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <Activity className="w-5 h-5 mr-2 text-red-600" />
+                Disease Updates
+              </CardTitle>
+              <CardDescription>
+                Monitor disease outbreaks and notify villages
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/dashboard/worker/disease-updates">View Updates</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

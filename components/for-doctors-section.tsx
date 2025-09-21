@@ -66,8 +66,8 @@ export default function ForDoctorsSection() {
               most.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="animate-glow">
-                Join as a Doctor
+              <Button size="lg" className="animate-glow" asChild>
+                <a href="/signup/doctor">Join as a Doctor</a>
               </Button>
               <Button size="lg" variant="outline">
                 Learn More
