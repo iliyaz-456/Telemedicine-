@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BackButton from '@/components/ui/back-button';
-import { Calendar, Clock, Heart, User, Phone, FileText, Pill, Search, MapPin } from 'lucide-react';
+import { Calendar, Clock, Heart, User, Phone, FileText, Pill, Search, MapPin, Home } from 'lucide-react';
 import Link from 'next/link';
 
 function PatientDashboard() {
@@ -26,9 +26,15 @@ function PatientDashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="secondary" className="px-3 py-1">
-                <User className="w-4 h-4 mr-1" />
+                <User className="w-5 h-5 mr-1" />
                 Patient
               </Badge>
+              <Link href="/">
+                <Button variant="outline" size="sm" className="shadow-sm hover:shadow">
+                  <Home className="w-4 h-4 mr-2" />
+                  Back to Home
+                </Button>
+              </Link>
               <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
