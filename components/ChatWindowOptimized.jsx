@@ -6,6 +6,7 @@ import { X, Minimize2, Maximize2, Send, Languages, RotateCcw, Wifi, WifiOff } fr
 import MessageBubble from './MessageBubble';
 import { useChatStream } from '../hooks/useChatStream';
 import { useChat } from '../hooks/useChat';
+import { useLanguage } from '../contexts/LanguageContext';
 
 /**
  * Optimized ChatWindow component with fallback support
@@ -18,6 +19,7 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [selectedLanguage, setSelectedLanguage] = useState('auto');
   const [useStreaming, setUseStreaming] = useState(true);
+  const { t } = useLanguage();
   const [streamingError, setStreamingError] = useState(false);
   const chatWindowRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -117,38 +119,38 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
   return (
     <motion.div
       ref={chatWindowRef}
-      className={`fixed z-40 ${isMinimized ? 'bottom-20 right-6 w-80 h-16' : 'top-20 right-6 w-96 h-[600px]'} bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden`}
+      className={`fixed z-40 ${isMinimized ? 'bottom-4 right-4 w-72 h-14' : 'bottom-4 right-4 w-80 h-[500px] sm:w-96 sm:h-[550px]'} bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden`}
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         cursor: isDragging ? 'grabbing' : 'default',
-        maxHeight: 'calc(100vh - 40px)',
-        maxWidth: 'calc(100vw - 40px)'
+        maxHeight: 'calc(100vh - 20px)',
+        maxWidth: 'calc(100vw - 20px)'
       }}
-      initial={{ opacity: 0, scale: 0.8, y: -20 }}
+      initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ 
         opacity: 1, 
         scale: 1, 
         y: 0,
-        width: isMinimized ? 320 : 384,
-        height: isMinimized ? 64 : 600
+        width: isMinimized ? 288 : window.innerWidth >= 640 ? 384 : 320,
+        height: isMinimized ? 56 : window.innerWidth >= 640 ? 550 : 500
       }}
-      exit={{ opacity: 0, scale: 0.8, y: -20 }}
+      exit={{ opacity: 0, scale: 0.8, y: 20 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       onMouseDown={handleMouseDown}
     >
       {/* Header */}
-      <div className="chat-header bg-gradient-to-r from-blue-500 to-green-500 text-white p-5 cursor-move select-none">
+      <div className="chat-header bg-gradient-to-r from-blue-500 to-green-500 text-white p-3 cursor-move select-none">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <span className="text-xl">🏥</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <span className="text-lg">🏥</span>
             </div>
             <div>
-              <h3 className="font-semibold text-base">Nabha Care</h3>
-              <p className="text-sm opacity-90">
-                Health Advisor {useStreaming ? '(Live)' : '(Standard)'}
-                {streamingError && <span className="text-yellow-300 ml-1">⚠️</span>}
-              </p>
+                    <h3 className="font-semibold text-sm">{t('chatbot.title')}</h3>
+                    <p className="text-xs opacity-90">
+                      {t('chatbot.subtitle')} {useStreaming ? '(Live)' : '(Standard)'}
+                      {streamingError && <span className="text-yellow-300 ml-1">⚠️</span>}
+                    </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -165,12 +167,13 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="bg-white bg-opacity-90 text-gray-800 text-xs rounded px-2 py-1 border-none outline-none font-medium shadow-sm"
+              className="bg-white bg-opacity-90 text-gray-800 text-xs rounded px-1 py-0.5 border-none outline-none font-medium shadow-sm"
               onClick={(e) => e.stopPropagation()}
               style={{ 
                 color: '#1f2937',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                minWidth: '80px'
+                minWidth: '70px',
+                fontSize: '11px'
               }}
             >
               {languages.map((lang) => (
@@ -197,7 +200,8 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
             </button>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+              className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition-colors"
+              title="Close chat"
             >
               <X className="w-4 h-4" />
             </button>
@@ -208,18 +212,17 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
       {!isMinimized && (
         <>
           {/* Messages Area */}
-          <div className="flex-1 h-[400px] overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 h-[350px] sm:h-[400px] overflow-y-auto p-3 space-y-3 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {messages.length === 0 ? (
-              <div className="text-center text-gray-500 mt-8">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🏥</span>
+              <div className="text-center text-gray-500 mt-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-xl">🏥</span>
                 </div>
-                <h4 className="font-semibold mb-2">Welcome to Nabha Care!</h4>
-                <p className="text-sm">I'm your health advisor. How can I help you today?</p>
-                <div className="mt-4 text-xs text-gray-400">
+                <h4 className="font-semibold mb-2 text-sm">{t('chatbot.welcome')}</h4>
+                <p className="text-xs mb-3">{t('chatbot.welcome.desc')}</p>
+                <div className="text-xs text-gray-400 space-y-1">
                   <p>• Ask about symptoms or health concerns</p>
                   <p>• Get doctor recommendations</p>
-                  <p>• Navigate the app features</p>
                   <p>• Real-time responses in English, Hindi, or Punjabi</p>
                   <p>• {useStreaming ? 'Live streaming mode active' : 'Standard mode active'}</p>
                 </div>
@@ -275,39 +278,39 @@ const ChatWindowOptimized = ({ isMinimized, onMinimize, onClose }) => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-white border-t border-gray-200">
+          <div className="p-3 bg-white border-t border-gray-200">
             <div className="flex items-end space-x-2">
               <div className="flex-1">
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={`Type your health concern in ${selectedLanguage === 'auto' ? 'any language' : selectedLanguage}...`}
-                  className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={2}
+                  placeholder={t('chatbot.placeholder')}
+                  className="w-full p-2 text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={1}
                   disabled={isLoading}
                 />
               </div>
               <button
                 onClick={handleSendMessage}
                 disabled={!message.trim() || isLoading}
-                className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Send message"
+                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title={t('chatbot.send')}
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4" />
               </button>
             </div>
             
             {/* Status Info */}
-            <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+            <div className="mt-1 flex items-center justify-between text-xs text-gray-400">
               <div>
-                {sessionId && `Session: ${sessionId.substring(0, 8)}...`}
+                {sessionId && `Session: ${sessionId.substring(0, 6)}...`}
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 {streamingError && (
-                  <span className="text-yellow-600">⚠️ Switched to standard mode</span>
+                  <span className="text-yellow-600 text-xs">⚠️</span>
                 )}
-                <span className={`${useStreaming ? 'text-green-600' : 'text-yellow-600'}`}>
+                <span className={`${useStreaming ? 'text-green-600' : 'text-yellow-600'} text-xs`}>
                   {useStreaming ? '🟢 Live' : '🟡 Standard'}
                 </span>
               </div>

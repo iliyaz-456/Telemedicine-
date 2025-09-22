@@ -1,8 +1,14 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Clock, Users, Zap, Heart } from "lucide-react"
+import Link from "next/link"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function ForDoctorsSection() {
+  const { t } = useLanguage()
+  
   const benefits = [
     {
       icon: Clock,
@@ -59,18 +65,16 @@ export default function ForDoctorsSection() {
         {/* CTA Card */}
         <Card className="max-w-4xl mx-auto p-8 bg-gradient-to-r from-primary/5 to-accent/5 border-2 border-primary/20">
           <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4">Ready to Make a Difference?</h3>
+            <h3 className="text-2xl font-bold mb-4">{t('section.forDoctors.title')}</h3>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Join hundreds of doctors who are already using NabhaCare to provide quality healthcare to rural
-              communities. Flexible hours, competitive compensation, and the satisfaction of serving those who need it
-              most.
+              {t('section.forDoctors.desc')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="animate-glow" asChild>
-                <a href="/signup/doctor">Join as a Doctor</a>
+                <Link href="/signup/doctor">{t('section.forDoctors.button')}</Link>
               </Button>
               <Button size="lg" variant="outline">
-                Learn More
+                {t('section.forDoctors.learnMore')}
               </Button>
             </div>
           </div>

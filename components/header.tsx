@@ -3,20 +3,16 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/AuthContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Phone, Plus, Leaf, Menu, X, User, LogOut } from "lucide-react"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentLang, setCurrentLang] = useState("English")
   const { isAuthenticated, user, logout } = useAuth()
-
-  const languages = [
-    { code: "en", label: "English" },
-    { code: "pa", label: "ਪੰਜਾਬੀ" },
-    { code: "hi", label: "हिंदी" },
-  ]
+  const { t } = useLanguage()
 
   const getDashboardUrl = () => {
     if (!user) return '/dashboard'
@@ -39,21 +35,21 @@ export default function Header() {
               <Phone className="h-5 w-5" />
               <Leaf className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-foreground">TelemediConnect</span>
+            <span className="text-xl font-bold text-foreground">NabhaCare</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#home" className="text-foreground hover:text-primary transition-colors relative group">
-              Home
+              {t('nav.home')}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </a>
             <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors relative group">
-              How it Works
+              {t('section.howItWorks')}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </a>
             <a href="#for-doctors" className="text-foreground hover:text-primary transition-colors relative group">
-              For Doctors
+              {t('section.forDoctors')}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </a>
             <a href="#for-asha" className="text-foreground hover:text-primary transition-colors relative group">
@@ -73,21 +69,7 @@ export default function Header() {
           {/* Right side - Auth or User info */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Switcher */}
-            <div className="flex items-center space-x-2 text-sm">
-              {languages.map((lang, index) => (
-                <div key={lang.code} className="flex items-center">
-                  <button
-                    onClick={() => setCurrentLang(lang.label)}
-                    className={`transition-colors hover:text-primary ${
-                      currentLang === lang.label ? "text-primary font-medium" : "text-muted-foreground"
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                  {index < languages.length - 1 && <span className="mx-2 text-muted-foreground">|</span>}
-                </div>
-              ))}
-            </div>
+            <LanguageSwitcher />
 
             {/* Authentication Section */}
             {isAuthenticated && user ? (
@@ -101,7 +83,7 @@ export default function Header() {
                 </div>
                 <Link href={getDashboardUrl()}>
                   <Button variant="outline" size="sm">
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Button variant="ghost" size="sm" onClick={logout}>
@@ -112,12 +94,12 @@ export default function Header() {
               <div className="flex items-center space-x-2">
                 <Link href="/login">
                   <Button variant="outline" size="sm">
-                    Sign In
+                    {t('nav.login')}
                   </Button>
                 </Link>
                 <Link href="/signup">
                   <Button className="animate-glow bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90">
-                    Sign Up
+                    {t('nav.signup')}
                   </Button>
                 </Link>
               </div>

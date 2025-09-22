@@ -1,6 +1,11 @@
+"use client"
+
 import { Phone, Plus, Leaf, Mail, MapPin } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function Footer() {
+  const { t } = useLanguage()
+  
   return (
     <footer id="contact" className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -16,8 +21,7 @@ export default function Footer() {
               <span className="text-xl font-bold">NabhaCare</span>
             </div>
             <p className="text-muted-foreground leading-relaxed mb-6 max-w-md">
-              Bridging the healthcare gap in rural Punjab through technology, community trust, and accessible medical
-              services. Every village deserves quality healthcare.
+              {t('footer.desc')}
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
@@ -92,7 +96,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">© 2024 NabhaCare. Made with ❤️ for rural Punjab.</p>
+          <p className="text-muted-foreground text-sm">{t('footer.copyright')}</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

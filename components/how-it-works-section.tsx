@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Phone, Video, Stethoscope, Bell } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function HowItWorksSection() {
   const [visibleSteps, setVisibleSteps] = useState<number[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
+  const { t } = useLanguage()
 
   const steps = [
     {

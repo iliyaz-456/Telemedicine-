@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Phone, Video, Loader2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 /**
  * HeroSection Component
@@ -29,21 +30,22 @@ export default function HeroSection() {
   const [isNavigating, setIsNavigating] = useState(false)
   const router = useRouter()
   const { isAuthenticated, isLoading, user } = useAuth()
+  const { language, t } = useLanguage()
 
   const heroTexts = [
     {
-      headline: "Healthcare at Your Doorstep",
-      subheadline: "Connecting rural Punjab with expert doctors through trusted ASHA workers",
+      headline: t('home.hero.title'),
+      subheadline: t('home.hero.subtitle'),
       lang: "English",
     },
     {
-      headline: "ਤੁਹਾਡੇ ਘਰ ਤੱਕ ਸਿਹਤ ਸੇਵਾ",
-      subheadline: "ਭਰੋਸੇਮੰਦ ਆਸ਼ਾ ਵਰਕਰਾਂ ਰਾਹੀਂ ਮਾਹਰ ਡਾਕਟਰਾਂ ਨਾਲ ਜੋੜਨਾ",
+      headline: t('home.hero.title.pa'),
+      subheadline: t('home.hero.subtitle.pa'),
       lang: "Punjabi",
     },
     {
-      headline: "आपके दरवाजे तक स्वास्थ्य सेवा",
-      subheadline: "विश्वसनीय आशा कार्यकर्ताओं के माध्यम से विशेषज्ञ डॉक्टरों से जुड़ना",
+      headline: t('home.hero.title.hi'),
+      subheadline: t('home.hero.subtitle.hi'),
       lang: "Hindi",
     },
   ]
@@ -134,11 +136,11 @@ export default function HeroSection() {
                 <div className="mb-4">
                   <Phone className="h-12 w-12 mx-auto text-primary animate-ring group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">📞 Missed Call Consultation</h3>
-                <p className="text-muted-foreground mb-4">1800-XXX-XXXX</p>
-                <p className="text-sm text-muted-foreground mb-6">Give a missed call. We will call you back.</p>
+                <h3 className="text-2xl font-bold mb-2">📞 {t('cta.missedCall')}</h3>
+                <p className="text-muted-foreground mb-4">{t('cta.missedCall.number')}</p>
+                <p className="text-sm text-muted-foreground mb-6">{t('cta.missedCall.desc')}</p>
                 <Button size="lg" className="w-full animate-glow">
-                  Call Now for Help
+                  {t('cta.missedCall.button')}
                 </Button>
               </div>
             </Card>
@@ -150,10 +152,10 @@ export default function HeroSection() {
                 <div className="mb-4">
                   <Video className="h-12 w-12 mx-auto text-accent animate-pulse group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">🎥 Video Consultation</h3>
+                <h3 className="text-2xl font-bold mb-2">🎥 {t('cta.videoCall')}</h3>
                 <p className="text-muted-foreground mb-4">Instant Connect</p>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Start a video consultation instantly with a doctor.
+                  {t('cta.videoCall.desc')}
                 </p>
                 {/* Start Video Call Button - Redirects based on authentication status */}
                 <Button
@@ -172,7 +174,7 @@ export default function HeroSection() {
                       }
                     </>
                   ) : (
-                    'Start Video Call'
+                    t('cta.videoCall.button')
                   )}
                 </Button>
               </div>

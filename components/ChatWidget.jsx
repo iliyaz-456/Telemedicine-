@@ -71,9 +71,10 @@ const ChatWidget = ({ className = '' }) => {
       </motion.button>
 
       {/* Chat Window */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <ChatWindowOptimized
+            key={`chat-window-${isOpen}`}
             isMinimized={isMinimized}
             onMinimize={minimizeChat}
             onClose={closeChat}

@@ -1,28 +1,34 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CheckCircle, DollarSign, BookOpen, Users } from "lucide-react"
+import Link from "next/link"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function AshaHeroesSection() {
+  const { t } = useLanguage()
+  
   const benefits = [
     {
       icon: CheckCircle,
-      title: "One-Click Workflows",
-      description: "Simple, intuitive tools that make your work easier",
+      title: t('benefit.oneClick'),
+      description: t('benefit.oneClick.desc'),
     },
     {
       icon: DollarSign,
-      title: "Fair Incentives",
-      description: "Earn competitive compensation for your valuable work",
+      title: t('benefit.fairIncentives'),
+      description: t('benefit.fairIncentives.desc'),
     },
     {
       icon: BookOpen,
-      title: "Continuous Training",
-      description: "Regular skill development and learning opportunities",
+      title: t('benefit.training'),
+      description: t('benefit.training.desc'),
     },
     {
       icon: Users,
-      title: "Trusted Community Link",
-      description: "Strengthen your role as a healthcare bridge in your community",
+      title: t('benefit.community'),
+      description: t('benefit.community.desc'),
     },
   ]
 
@@ -51,14 +57,12 @@ export default function AshaHeroesSection() {
           {/* Right: Content */}
           <div>
             <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-balance mb-4">Empowering Our ASHA Heroes</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-balance mb-4">{t('asha.title')}</h2>
               <p className="text-xl text-muted-foreground text-balance mb-6">
-                Tech-Enabled, Community-Driven Healthcare
+                {t('asha.subtitle')}
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Join our mission to bring quality healthcare to every doorstep in rural Punjab. As an ASHA worker with
-                NabhaCare, you&apos;ll be equipped with modern tools while maintaining the personal touch that makes you
-                trusted in your community.
+                {t('asha.desc')}
               </p>
             </div>
 
@@ -83,7 +87,7 @@ export default function AshaHeroesSection() {
             </div>
 
             <Button size="lg" className="animate-glow" asChild>
-              <a href="/signup/asha-worker">Join as an ASHA Worker</a>
+              <Link href="/signup">{t('asha.button')}</Link>
             </Button>
           </div>
         </div>
