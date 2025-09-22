@@ -127,7 +127,13 @@ function DoctorDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">View Queue</Button>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push('/dashboard/doctor/patient-queue')}
+              >
+                View Queue
+              </Button>
             </CardContent>
           </Card>
 
