@@ -1,12 +1,34 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Phone, Video } from "lucide-react"
+import { Phone, Video, Loader2 } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+
+/**
+ * HeroSection Component
+ * 
+ * Features:
+ * - Multi-language rotating headlines (English, Punjabi, Hindi)
+ * - Missed call consultation card
+ * - Video consultation card with role-based routing
+ * 
+ * Video Call Button Functionality:
+ * - If user is NOT logged in: redirects to /signup (patient signup)
+ * - If Patient is logged in: redirects to /dashboard/patient (Patient Dashboard)
+ * - If Doctor is logged in: redirects to /dashboard/doctor (Doctor Dashboard)
+ * - If Asha Worker is logged in: redirects to /dashboard/worker (Asha Worker Dashboard)
+ * - Shows loading indicator during navigation with role-specific messaging
+ * - Handles errors gracefully with user-friendly error messages
+ */
 
 export default function HeroSection() {
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const router = useRouter()
+  const { isAuthenticated, isLoading, user } = useAuth()
 
   const heroTexts = [
     {
@@ -33,6 +55,57 @@ export default function HeroSection() {
     return () => clearInterval(interval)
   }, [heroTexts.length])
 
+  /**
+   * Handles the "Start Video Call" button click with role-based routing
+   * - If user is not logged in: redirects to patient signup page
+   * - If Patient is logged in: redirects to Patient Dashboard
+   * - If Doctor is logged in: redirects to Doctor Dashboard  
+   * - If Asha Worker is logged in: redirects to Asha Worker Dashboard
+   * - Shows loading indicator during navigation
+   * - Handles errors gracefully
+   */
+  const handleVideoCall = async () => {
+    try {
+      setIsNavigating(true)
+      
+      // Small delay to show loading state for better UX
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      if (!isAuthenticated) {
+        // User not logged in - redirect to patient signup page
+        router.push('/signup')
+      } else {
+        // User is logged in - redirect based on role
+        if (user) {
+          switch (user.role) {
+            case 'Patient':
+              router.push('/dashboard/patient')
+              break
+            case 'Doctor':
+              router.push('/dashboard/doctor')
+              break
+            case 'Worker':
+              router.push('/dashboard/worker')
+              break
+            default:
+              // Fallback to patient dashboard for unknown roles
+              router.push('/dashboard/patient')
+          }
+        } else {
+          // User object not available, redirect to signup
+          router.push('/signup')
+        }
+      }
+    } catch (error) {
+      console.error('Navigation error:', error)
+      // Reset loading state on error
+      setIsNavigating(false)
+      // Show user-friendly error message
+      alert('Navigation failed. Please try again.')
+    }
+  }
+
+
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Video Placeholder */}
@@ -53,7 +126,7 @@ export default function HeroSection() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto animate-slide-in-up">
+        <div className="max-w-6xl mx-auto animate-slide-in-up">
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Missed Call Consultation */}
             <Card className="p-8 bg-card/80 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
@@ -70,6 +143,7 @@ export default function HeroSection() {
               </div>
             </Card>
 
+
             {/* Video Consultation */}
             <Card className="p-8 bg-card/80 backdrop-blur-sm border-2 border-accent/20 hover:border-accent/40 transition-all duration-300 group">
               <div className="text-center">
@@ -81,19 +155,32 @@ export default function HeroSection() {
                 <p className="text-sm text-muted-foreground mb-6">
                   Start a video consultation instantly with a doctor.
                 </p>
+                {/* Start Video Call Button - Redirects based on authentication status */}
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground bg-transparent"
+                  onClick={handleVideoCall}
+                  disabled={isNavigating || isLoading}
                 >
-                  Start Video Call
+                  {isNavigating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {isAuthenticated 
+                        ? `Redirecting to ${user?.role || 'Dashboard'}...` 
+                        : 'Redirecting to Signup...'
+                      }
+                    </>
+                  ) : (
+                    'Start Video Call'
+                  )}
                 </Button>
               </div>
             </Card>
           </div>
 
           <p className="text-center text-muted-foreground">
-            Choose a missed call or start a video consultation instantly.
+            Choose a missed call or video consultation instantly.
           </p>
         </div>
 

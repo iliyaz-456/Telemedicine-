@@ -7,6 +7,7 @@ import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BackButton, { BackToDashboardButton } from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, 
@@ -394,12 +395,11 @@ function PatientHealthRecordPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard/worker/health-records" className="flex items-center">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Health Records
-                </Link>
-              </Button>
+              <BackButton 
+                text="Back to Health Records" 
+                to="/dashboard/worker/health-records"
+                className="bg-primary/10 hover:bg-primary/20 text-primary"
+              />
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">{patient.name}'s Health Record</h1>
                 <p className="text-gray-600 mt-1">Complete health information and medical history</p>
@@ -760,3 +760,6 @@ function PatientHealthRecordPage() {
 
 // Export the component with authentication wrapper
 export default withAuth(PatientHealthRecordPage, ['Worker']);
+
+
+

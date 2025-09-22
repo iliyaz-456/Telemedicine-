@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { BackToDashboardButton } from '@/components/ui/back-button';
 import { 
   ArrowLeft, 
   Search, 
@@ -287,12 +288,7 @@ function HealthRecordsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard/worker" className="flex items-center">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Link>
-              </Button>
+              <BackToDashboardButton userRole="Worker" />
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Patient Health Records</h1>
                 <p className="text-gray-600 mt-1">Manage health records of your registered patients</p>
@@ -507,3 +503,6 @@ function HealthRecordsPage() {
 
 // Export the component with authentication wrapper
 export default withAuth(HealthRecordsPage, ['Worker']);
+
+
+

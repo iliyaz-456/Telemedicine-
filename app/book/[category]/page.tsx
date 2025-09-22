@@ -354,7 +354,7 @@ export default function DoctorCategoryPage() {
                   <div className="flex items-center space-x-4">
                     {/* Doctor Avatar */}
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg">
-                      {doctor.name.split(' ').map(n => n[0]).join('')}
+                      {doctor.name.split(' ').map((n: string) => n[0]).join('')}
                     </div>
                     
                     <div>
@@ -453,3 +453,6 @@ export default function DoctorCategoryPage() {
     </div>
   );
 }
+
+
+

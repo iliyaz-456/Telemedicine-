@@ -6,6 +6,7 @@ import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BackToDashboardButton } from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   DropdownMenu,
@@ -390,12 +391,7 @@ function MedicalRecordsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard/patient" className="flex items-center">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Link>
-              </Button>
+              <BackToDashboardButton userRole={user?.role || 'Patient'} />
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Medical Records</h1>
                 <p className="text-gray-600 mt-1">Your complete health history and medical information</p>

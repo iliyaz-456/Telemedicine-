@@ -1,13 +1,19 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BackButton from '@/components/ui/back-button';
 import { Calendar, Clock, Users, User, Stethoscope, FileText, Video } from 'lucide-react';
+import VideoCallModal from '@/components/video-call-modal';
 
 function DoctorDashboard() {
   const { user, logout } = useAuth();
+  const [isVideoCallModalOpen, setIsVideoCallModalOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -15,9 +21,12 @@ function DoctorDashboard() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
-              <p className="text-gray-600">Welcome back, Dr. {user?.name}</p>
+            <div className="flex items-center gap-4">
+              <BackButton />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
+                <p className="text-gray-600">Welcome back, Dr. {user?.name}</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="secondary" className="px-3 py-1">
@@ -98,7 +107,12 @@ function DoctorDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Start Video Call</Button>
+              <Button 
+                className="w-full" 
+                onClick={() => setIsVideoCallModalOpen(true)}
+              >
+                Start Video Call
+              </Button>
             </CardContent>
           </Card>
 
@@ -128,7 +142,13 @@ function DoctorDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">View Records</Button>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push('/dashboard/doctor/medical-records')}
+              >
+                View Records
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -262,6 +282,16 @@ function DoctorDashboard() {
           </Card>
         </div>
       </main>
+
+      {/* Video Call Modal */}
+      <VideoCallModal
+        isOpen={isVideoCallModalOpen}
+        onClose={() => setIsVideoCallModalOpen(false)}
+        doctorName={user?.name || 'Dr. Smith'}
+        doctorId={user?._id || 'doctor-1'}
+        patientName="Patient"
+        patientId="patient-1"
+      />
     </div>
   );
 }

@@ -7,9 +7,9 @@ export default function ServicesSection() {
   const services = [
     {
       icon: Video,
-      title: "Assisted Tele-Consultation (Audio + Video)",
+      title: "Assisted Tele-Consultation (Video)",
       description:
-        "Connect with qualified doctors through both audio calls and video consultations with help from your local ASHA worker",
+        "Connect with qualified doctors through video consultations with help from your local ASHA worker",
       size: "large",
       gradient: "from-primary/20 to-primary/5",
     },
