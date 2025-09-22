@@ -386,6 +386,8 @@ const mockDoctorConsultations: ConsultationRecord[] = [
   }
 ];
 
+// (Removed) Demo patient records and related types
+
 function DoctorMedicalRecords() {
   const { user, token } = useAuth();
   const [consultations, setConsultations] = useState<ConsultationRecord[]>([]);
@@ -396,6 +398,7 @@ function DoctorMedicalRecords() {
   const [editingRecord, setEditingRecord] = useState<ConsultationRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Removed demoRecords state
 
   // Fetch medical records from API
   const fetchMedicalRecords = async () => {
@@ -459,6 +462,8 @@ function DoctorMedicalRecords() {
     setEditingRecord({ ...consultation });
     setIsEditModalOpen(true);
   };
+
+  // Removed demo change/save handlers
 
   const handleSaveRecord = async () => {
     if (!editingRecord) return;
@@ -769,6 +774,8 @@ function DoctorMedicalRecords() {
           )}
           </div>
         )}
+
+        {/* Removed demo patient editable section */}
       </main>
 
       {/* Edit Record Modal */}

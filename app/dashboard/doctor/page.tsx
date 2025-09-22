@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BackButton from '@/components/ui/back-button';
-import { Calendar, Clock, Users, User, Stethoscope, FileText, Video } from 'lucide-react';
+import { Calendar, Clock, Users, User, Stethoscope, FileText, Video, Brain } from 'lucide-react';
 import VideoCallModal from '@/components/video-call-modal';
 
 function DoctorDashboard() {
@@ -283,6 +283,29 @@ function DoctorDashboard() {
                   <Users className="w-4 h-4 mr-2" />
                   Patient Directory
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Summary (Coming Soon) */}
+          <Card className="relative overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-primary" />
+                AI Summary (Coming Soon)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 border border-dashed rounded-lg bg-muted/30">
+                <p className="text-sm text-muted-foreground">
+                  Submit patient health records here to get a concise summary. Feature coming soon.
+                </p>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <Button variant="outline" disabled title="Coming soon" className="cursor-not-allowed opacity-60">
+                  Generate Summary
+                </Button>
+                <span className="text-xs text-muted-foreground">This feature is a placeholder and currently disabled.</span>
               </div>
             </CardContent>
           </Card>

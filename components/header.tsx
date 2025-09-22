@@ -64,6 +64,10 @@ export default function Header() {
               Contact
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </a>
+            <Link href="/campaigns" className="text-foreground hover:text-primary transition-colors relative group">
+              Campaigns
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+            </Link>
           </nav>
 
           {/* Right side - Auth or User info */}
@@ -145,6 +149,9 @@ export default function Header() {
               <a href="#contact" className="text-foreground hover:text-primary transition-colors">
                 Contact
               </a>
+              <Link href="/campaigns" className="text-foreground hover:text-primary transition-colors">
+                Campaigns
+              </Link>
               
               {/* Mobile Authentication Section */}
               <div className="flex flex-col space-y-4 pt-4 border-t">
