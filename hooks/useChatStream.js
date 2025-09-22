@@ -112,7 +112,15 @@ export const useChatStream = () => {
                   setSessionId(data.sessionId);
                 }
               } else if (data.type === 'error') {
-                throw new Error(data.error || 'Streaming error occurred');
+                // Check if it's a quota exceeded error
+                const errorMessage = data.error || 'Streaming error occurred';
+                if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
+                  console.log('📊 Quota exceeded in streaming, using fallback');
+                  // Don't throw error, just log it and continue
+                  setError('Service is temporarily busy. Please try again in a moment.');
+                } else {
+                  throw new Error(errorMessage);
+                }
               }
             } catch (parseError) {
               console.error('Error parsing streaming data:', parseError);
@@ -123,7 +131,19 @@ export const useChatStream = () => {
 
     } catch (err) {
       console.error('Streaming chat error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      let errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      
+      // Handle specific error types
+      if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
+        errorMessage = 'Service is temporarily busy. Please try again in a moment.';
+      } else if (errorMessage.includes('GEMINI_API_KEY')) {
+        errorMessage = 'Chatbot configuration error. Please contact support.';
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else {
+        errorMessage = 'Sorry, something went wrong. Please try again.';
+      }
+      
       setError(errorMessage);
       
       // Add error message to chat

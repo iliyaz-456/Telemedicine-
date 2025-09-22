@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import BackButton from '@/components/ui/back-button';
 import { MapPin, Phone, Users, User, Heart, FileText, Video, AlertCircle, Pill, Activity, Home } from 'lucide-react';
 import Link from 'next/link';
-import Link from 'next/link';
 
 function WorkerDashboard() {
   const { user, logout } = useAuth();
