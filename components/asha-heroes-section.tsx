@@ -57,7 +57,7 @@ export default function AshaHeroesSection() {
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 Join our mission to bring quality healthcare to every doorstep in rural Punjab. As an ASHA worker with
-                Sehat Saathi, you&apos;ll be equipped with modern tools while maintaining the personal touch that makes you
+                NabhaCare, you&apos;ll be equipped with modern tools while maintaining the personal touch that makes you
                 trusted in your community.
               </p>
             </div>

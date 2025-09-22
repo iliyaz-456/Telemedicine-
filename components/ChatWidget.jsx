@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
-import ChatWindow from './ChatWindow';
+import ChatWindowOptimized from './ChatWindowOptimized';
 
 /**
  * ChatWidget - Main floating chat button and window container
@@ -43,7 +43,7 @@ const ChatWidget = ({ className = '' }) => {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        title="Open Sehat Saathi Health Advisor"
+        title="Open NabhaCare Health Advisor"
       >
         <AnimatePresence mode="wait">
           {isOpen && !isMinimized ? (
@@ -73,7 +73,7 @@ const ChatWidget = ({ className = '' }) => {
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <ChatWindow
+          <ChatWindowOptimized
             isMinimized={isMinimized}
             onMinimize={minimizeChat}
             onClose={closeChat}

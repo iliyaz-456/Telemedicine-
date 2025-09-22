@@ -13,7 +13,7 @@ export default function Footer() {
                 <Phone className="h-5 w-5" />
                 <Leaf className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold">Sehat Saathi Nabha</span>
+              <span className="text-xl font-bold">NabhaCare</span>
             </div>
             <p className="text-muted-foreground leading-relaxed mb-6 max-w-md">
               Bridging the healthcare gap in rural Punjab through technology, community trust, and accessible medical
@@ -92,7 +92,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">© 2024 Sehat Saathi Nabha. Made with ❤️ for rural Punjab.</p>
+          <p className="text-muted-foreground text-sm">© 2024 NabhaCare. Made with ❤️ for rural Punjab.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

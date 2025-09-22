@@ -1,50 +1,20 @@
 'use server';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import connectDB from '../../../backend/utils/mongodb';
-import ChatMessage from '../../../backend/models/ChatMessage';
+import connectDB from '../../../../backend/utils/mongodb';
+import ChatMessage from '../../../../backend/models/ChatMessage';
 import { getToken } from 'next-auth/jwt';
-import { getDoctorData, getASHAData, formatDoctorData, formatASHAData } from '../../../lib/mockData';
+import { getDoctorData, getASHAData, formatDoctorData, formatASHAData } from '../../../../lib/mockData';
 
-// Types for the chat API
-interface ChatRequest {
+// Types for the streaming chat API
+interface StreamChatRequest {
   message: string;
   lang?: string;
   sessionId?: string;
   conversationHistory?: Array<{ role: 'user' | 'assistant'; message: string }>;
 }
 
-interface ChatResponse {
-  success: boolean;
-  message: string;
-  doctorSuggestion?: {
-    name: string;
-    category: string;
-    reason: string;
-  };
-  detectedLanguage?: string;
-  sessionId?: string;
-  error?: string;
-}
-
-// Doctor mapping for recommendations
-const DOCTOR_MAPPING = {
-  'fever': { name: 'Dr. Meena', category: 'General Physician', reason: 'Fever and general symptoms' },
-  'chest pain': { name: 'Dr. Sharma', category: 'Cardiologist', reason: 'Cardiac symptoms' },
-  'heart': { name: 'Dr. Sharma', category: 'Cardiologist', reason: 'Heart-related concerns' },
-  'skin': { name: 'Dr. Raj', category: 'Dermatologist', reason: 'Skin conditions' },
-  'rash': { name: 'Dr. Raj', category: 'Dermatologist', reason: 'Skin rash or irritation' },
-  'child': { name: 'Dr. Priya', category: 'Pediatrician', reason: 'Pediatric care' },
-  'baby': { name: 'Dr. Priya', category: 'Pediatrician', reason: 'Infant care' },
-  'bone': { name: 'Dr. Kumar', category: 'Orthopedist', reason: 'Bone and joint issues' },
-  'joint': { name: 'Dr. Kumar', category: 'Orthopedist', reason: 'Joint pain or mobility issues' },
-  'stomach': { name: 'Dr. Meena', category: 'General Physician', reason: 'Digestive issues' },
-  'headache': { name: 'Dr. Meena', category: 'General Physician', reason: 'Headaches and general symptoms' },
-  'cough': { name: 'Dr. Meena', category: 'General Physician', reason: 'Respiratory symptoms' },
-  'breathing': { name: 'Dr. Meena', category: 'General Physician', reason: 'Breathing difficulties' }
-};
-
-// Language detection keywords
+// Language detection keywords (same as main route)
 const LANGUAGE_KEYWORDS = {
   hindi: ['है', 'हैं', 'में', 'को', 'से', 'पर', 'के', 'की', 'का', 'हो', 'कर', 'दे', 'ले', 'जा', 'आ', 'बीमार', 'दर्द', 'बुखार', 'खांसी', 'सिरदर्द', 'पेट', 'सीना', 'मुझे', 'मेरे', 'हिंदी', 'भारत'],
   punjabi: ['ਹੈ', 'ਹਨ', 'ਵਿੱਚ', 'ਨੂੰ', 'ਤੋਂ', 'ਤੇ', 'ਦੇ', 'ਦੀ', 'ਦਾ', 'ਹੋ', 'ਕਰ', 'ਦੇ', 'ਲੈ', 'ਜਾ', 'ਆ', 'ਬੀਮਾਰ', 'ਦਰਦ', 'ਬੁਖਾਰ', 'ਖੰਘ', 'ਸਿਰਦਰਦ', 'ਪੇਟ', 'ਛਾਤੀ', 'ਮੈਨੂੰ', 'ਮੇਰੇ', 'ਪੰਜਾਬੀ', 'ਪੰਜਾਬ'],
@@ -55,12 +25,10 @@ const LANGUAGE_KEYWORDS = {
 function detectLanguage(text: string): string {
   const lowerText = text.toLowerCase();
   
-  // Count language-specific keywords
   const hindiCount = LANGUAGE_KEYWORDS.hindi.filter(word => lowerText.includes(word)).length;
   const punjabiCount = LANGUAGE_KEYWORDS.punjabi.filter(word => lowerText.includes(word)).length;
   const englishCount = LANGUAGE_KEYWORDS.english.filter(word => lowerText.includes(word)).length;
   
-  // Check for script patterns
   const hasDevanagari = /[\u0900-\u097F]/.test(text);
   const hasGurmukhi = /[\u0A00-\u0A7F]/.test(text);
   
@@ -68,21 +36,7 @@ function detectLanguage(text: string): string {
   if (hasDevanagari || hindiCount > 0) return 'hindi';
   if (englishCount > 0) return 'english';
   
-  // Default to English if no clear indicators
   return 'english';
-}
-
-// Check for doctor recommendation keywords
-function getDoctorSuggestion(message: string): { name: string; category: string; reason: string } | null {
-  const lowerMessage = message.toLowerCase();
-  
-  for (const [keyword, doctorInfo] of Object.entries(DOCTOR_MAPPING)) {
-    if (lowerMessage.includes(keyword)) {
-      return doctorInfo;
-    }
-  }
-  
-  return null;
 }
 
 // Check if user is asking for mock data
@@ -129,18 +83,7 @@ function checkForMockDataRequest(message: string, language: string): string | nu
   return null;
 }
 
-// Initialize Gemini AI with secure API key handling
-function initializeGemini() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is not set');
-  }
-  
-  return new GoogleGenerativeAI(apiKey);
-}
-
-// Generate optimized system prompt based on language
+// Optimized system prompts
 function getSystemPrompt(language: string): string {
   const prompts = {
     english: `You are Nabha Care, a concise health advisor for a telemedicine app in Nabha village.
@@ -204,43 +147,15 @@ Respond in English only.`,
   return prompts[language as keyof typeof prompts] || prompts.english;
 }
 
-// Optimized Gemini API call with streaming support
-async function callGeminiAPI(message: string, language: string, conversationHistory: Array<{ role: string; message: string }>): Promise<string> {
-  try {
-    const genAI = initializeGemini();
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        maxOutputTokens: 200, // Limit response length
-        temperature: 0.7,
-        topP: 0.8,
-        topK: 40
-      }
-    });
-    
-    // Build concise conversation context (only last 2 exchanges)
-    let conversationContext = '';
-    if (conversationHistory && conversationHistory.length > 0) {
-      const recentHistory = conversationHistory.slice(-4); // Last 2 exchanges
-      conversationContext = '\n\nRecent context:\n' + 
-        recentHistory.map(msg => 
-          `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.message.substring(0, 100)}${msg.message.length > 100 ? '...' : ''}`
-        ).join('\n');
-    }
-    
-    const systemPrompt = getSystemPrompt(language);
-    const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\nAssistant:`;
-    
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    // Ensure response is concise
-    return text.length > 300 ? text.substring(0, 300) + '...' : text;
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error(`Failed to get response from Gemini: ${error instanceof Error ? error.message : 'Unknown error'}`);
+// Initialize Gemini AI
+function initializeGemini() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY environment variable is not set');
   }
+  
+  return new GoogleGenerativeAI(apiKey);
 }
 
 // Save chat message to MongoDB
@@ -274,28 +189,6 @@ async function saveChatMessage(
     return chatMessage;
   } catch (error) {
     console.error('Error saving chat message:', error);
-    // Don't throw error to avoid breaking the chat flow
-  }
-}
-
-// Get chat history from MongoDB
-async function getChatHistory(userId: string, sessionId: string, limit: number = 10) {
-  try {
-    await connectDB();
-    
-    const messages = await ChatMessage.find({
-      userId,
-      sessionId
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .select('role message language createdAt')
-    .lean();
-    
-    return messages.reverse(); // Return in chronological order
-  } catch (error) {
-    console.error('Error getting chat history:', error);
-    return [];
   }
 }
 
@@ -303,17 +196,17 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body: ChatRequest = await request.json();
+    const body: StreamChatRequest = await request.json();
     const { message, lang, sessionId, conversationHistory = [] } = body;
 
     if (!message || !message.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Message is required' },
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: 'Message is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    // Get user authentication (optional - for logged-in users)
+    // Get user authentication
     let userId = 'anonymous';
     try {
       const token = await getToken({ req: request });
@@ -321,21 +214,14 @@ export async function POST(request: NextRequest) {
         userId = token.sub;
       }
     } catch (authError) {
-      // Continue with anonymous user if auth fails
       console.log('Auth not available, using anonymous user');
     }
 
-    // Generate session ID if not provided
     const currentSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Detect language if not provided or auto
     const detectedLanguage = lang && lang !== 'auto' ? lang : detectLanguage(message);
-    
+
     // Check for mock data requests first
     const mockDataResponse = checkForMockDataRequest(message, detectedLanguage);
-    
-    // Get doctor suggestion if applicable
-    const doctorSuggestion = getDoctorSuggestion(message);
 
     // Save user message to MongoDB
     await saveChatMessage(
@@ -347,94 +233,174 @@ export async function POST(request: NextRequest) {
       detectedLanguage
     );
 
-    // Get recent chat history from MongoDB if not provided
+    // Prepare conversation context
     let chatHistory = conversationHistory;
     if (chatHistory.length === 0) {
-      const dbHistory = await getChatHistory(userId, currentSessionId, 6);
-      chatHistory = dbHistory.map(msg => ({
-        role: msg.role,
-        message: msg.message
-      }));
-    }
-
-    // Use mock data if available, otherwise call Gemini API
-    let finalResponse;
-    if (mockDataResponse) {
-      finalResponse = mockDataResponse;
-    } else {
-      finalResponse = await callGeminiAPI(message, detectedLanguage, chatHistory);
-    }
-    const responseTime = Date.now() - startTime;
-
-    // Save assistant response to MongoDB
-    await saveChatMessage(
-      userId,
-      currentSessionId,
-      'assistant',
-      finalResponse,
-      detectedLanguage,
-      detectedLanguage,
-      doctorSuggestion,
-      false,
-      {
-        responseTime,
-        model: mockDataResponse ? 'mock-data' : 'gemini-1.5-flash'
+      try {
+        await connectDB();
+        const dbHistory = await ChatMessage.find({
+          userId,
+          sessionId: currentSessionId
+        })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .select('role message language createdAt')
+        .lean();
+        
+        chatHistory = dbHistory.reverse().map(msg => ({
+          role: msg.role,
+          message: msg.message
+        }));
+      } catch (error) {
+        console.error('Error getting chat history:', error);
+        chatHistory = [];
       }
-    );
+    }
 
-    const responseData: ChatResponse = {
-      success: true,
-      message: finalResponse,
-      doctorSuggestion,
-      detectedLanguage,
-      sessionId: currentSessionId
-    };
+    // Initialize Gemini and create streaming response
+    const genAI = initializeGemini();
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        maxOutputTokens: 200,
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40
+      }
+    });
 
-    return NextResponse.json(responseData);
+    // Build prompt
+    let conversationContext = '';
+    if (chatHistory && chatHistory.length > 0) {
+      const recentHistory = chatHistory.slice(-4);
+      conversationContext = '\n\nRecent context:\n' + 
+        recentHistory.map(msg => 
+          `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.message.substring(0, 100)}${msg.message.length > 100 ? '...' : ''}`
+        ).join('\n');
+    }
+    
+    const systemPrompt = getSystemPrompt(detectedLanguage);
+    const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\nAssistant:`;
+
+    // Create streaming response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let fullResponse = '';
+          
+          // Handle mock data response
+          if (mockDataResponse) {
+            fullResponse = mockDataResponse;
+            
+            // Send mock data as chunks for streaming effect
+            const words = fullResponse.split(' ');
+            for (let i = 0; i < words.length; i++) {
+              const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
+              
+              const data = JSON.stringify({
+                type: 'chunk',
+                content: chunk,
+                sessionId: currentSessionId
+              });
+              
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+              
+              // Small delay for streaming effect
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+          } else {
+            // Handle Gemini API streaming
+            const result = await model.generateContentStream(fullPrompt);
+            
+            for await (const chunk of result.stream) {
+              const chunkText = chunk.text();
+              fullResponse += chunkText;
+              
+              // Send chunk to client
+              const data = JSON.stringify({
+                type: 'chunk',
+                content: chunkText,
+                sessionId: currentSessionId
+              });
+              
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            }
+          }
+
+          // Save complete response to MongoDB
+          await saveChatMessage(
+            userId,
+            currentSessionId,
+            'assistant',
+            fullResponse,
+            detectedLanguage,
+            detectedLanguage,
+            null,
+            false,
+            {
+              responseTime: Date.now() - startTime,
+              model: mockDataResponse ? 'mock-data' : 'gemini-1.5-flash'
+            }
+          );
+
+          // Send completion signal
+          const completionData = JSON.stringify({
+            type: 'complete',
+            sessionId: currentSessionId,
+            detectedLanguage
+          });
+          
+          controller.enqueue(encoder.encode(`data: ${completionData}\n\n`));
+          controller.close();
+
+        } catch (error) {
+          console.error('Streaming error:', error);
+          
+          // Save error message
+          await saveChatMessage(
+            userId,
+            currentSessionId,
+            'assistant',
+            "I apologize, but I'm experiencing technical difficulties. Please try again.",
+            'english',
+            'english',
+            null,
+            true,
+            { responseTime: Date.now() - startTime }
+          );
+
+          const errorData = JSON.stringify({
+            type: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            sessionId: currentSessionId
+          });
+          
+          controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
+          controller.close();
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
 
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error('Streaming API error:', error);
     
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-    
-    // Try to save error message to MongoDB
-    try {
-      const body: ChatRequest = await request.json();
-      const { sessionId } = body;
-      const currentSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      let userId = 'anonymous';
-      try {
-        const token = await getToken({ req: request });
-        if (token?.sub) {
-          userId = token.sub;
-        }
-      } catch (authError) {
-        // Continue with anonymous user
-      }
-
-      await saveChatMessage(
-        userId,
-        currentSessionId,
-        'assistant',
-        "I apologize, but I'm experiencing technical difficulties. Please try again in a moment or contact support if the issue persists.",
-        'english',
-        'english',
-        null,
-        true,
-        { responseTime: Date.now() - startTime }
-      );
-    } catch (saveError) {
-      console.error('Error saving error message:', saveError);
-    }
-    
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: errorMessage,
-        message: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment or contact support if the issue persists."
-      },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : 'Internal server error' 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

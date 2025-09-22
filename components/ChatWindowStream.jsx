@@ -2,15 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Minimize2, Maximize2, Send, Languages } from 'lucide-react';
+import { X, Minimize2, Maximize2, Send, Languages, RotateCcw } from 'lucide-react';
 import MessageBubble from './MessageBubble';
-import { useChat } from '../hooks/useChat';
+import { useChatStream } from '../hooks/useChatStream';
 
 /**
- * ChatWindow component - Main chat interface
- * Features: draggable, responsive, multilingual support
+ * Enhanced ChatWindow component with streaming support
+ * Features: draggable, responsive, multilingual support, real-time streaming
  */
-const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
+const ChatWindowStream = ({ isMinimized, onMinimize, onClose }) => {
   const [message, setMessage] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -22,18 +22,21 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
   const {
     messages,
     isLoading,
+    error,
+    sessionId,
+    streamingMessage,
     sendMessage,
-    clearMessages
-  } = useChat();
+    clearMessages,
+    retryLastMessage
+  } = useChatStream();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, streamingMessage]);
 
   // Handle dragging functionality
   const handleMouseDown = (e) => {
-    // Only allow dragging from header area
     if (e.target === e.currentTarget || (e.target).closest('.chat-header')) {
       setIsDragging(true);
       setDragStart({
@@ -69,8 +72,9 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
 
   const handleSendMessage = async () => {
     if (message.trim()) {
-      await sendMessage(message, selectedLanguage);
-      setMessage('');
+      const messageToSend = message.trim();
+      setMessage(''); // Clear input immediately
+      await sendMessage(messageToSend, selectedLanguage);
     }
   };
 
@@ -117,7 +121,7 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
             </div>
             <div>
               <h3 className="font-semibold text-sm">NabhaCare</h3>
-              <p className="text-xs opacity-90">Health Advisor</p>
+              <p className="text-xs opacity-90">Health Advisor (Live)</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -125,15 +129,29 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="bg-white bg-opacity-20 text-white text-xs rounded px-2 py-1 border-none outline-none"
+              className="bg-white bg-opacity-90 text-gray-800 text-xs rounded px-2 py-1 border-none outline-none font-medium"
               onClick={(e) => e.stopPropagation()}
+              style={{ 
+                color: '#1f2937',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)'
+              }}
             >
               {languages.map((lang) => (
-                <option key={lang.value} value={lang.value} className="text-gray-800">
+                <option key={lang.value} value={lang.value} className="text-gray-800 bg-white">
                   {lang.label}
                 </option>
               ))}
             </select>
+            
+            {/* Clear Chat Button */}
+            <button
+              onClick={clearMessages}
+              className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+              title="Clear chat"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+            
             <button
               onClick={onMinimize}
               className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
@@ -160,33 +178,57 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
                   <span className="text-2xl">🏥</span>
                 </div>
                 <h4 className="font-semibold mb-2">Welcome to NabhaCare!</h4>
-                <p className="text-sm">I&apos;m your health advisor. How can I help you today?</p>
+                <p className="text-sm">I'm your health advisor. How can I help you today?</p>
                 <div className="mt-4 text-xs text-gray-400">
                   <p>• Ask about symptoms or health concerns</p>
                   <p>• Get doctor recommendations</p>
                   <p>• Navigate the app features</p>
+                  <p>• Real-time responses in English, Hindi, or Punjabi</p>
                 </div>
               </div>
             ) : (
-              messages.map((msg, index) => (
-                <MessageBubble
-                  key={msg.id}
-                  message={msg.message}
-                  isUser={msg.role === 'user'}
-                  timestamp={msg.timestamp}
-                  doctorSuggestion={msg.doctorSuggestion}
-                  isError={msg.isError}
-                />
-              ))
+              <>
+                {messages.map((msg, index) => (
+                  <MessageBubble
+                    key={msg.id}
+                    message={msg.message}
+                    isUser={msg.role === 'user'}
+                    timestamp={msg.timestamp}
+                    doctorSuggestion={msg.doctorSuggestion}
+                    isError={msg.isError}
+                  />
+                ))}
+                
+                {/* Streaming message */}
+                {streamingMessage && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-white font-bold">SS</span>
+                        </div>
+                        <span className="text-xs text-gray-500">NabhaCare</span>
+                        <div className="flex space-x-1">
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-800 whitespace-pre-wrap">{streamingMessage}</p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-            {isLoading && (
+            
+            {isLoading && !streamingMessage && (
               <div className="flex items-center space-x-2 text-gray-500">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
-                <span className="text-sm">NabhaCare is typing...</span>
+                <span className="text-sm">NabhaCare is thinking...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -203,6 +245,7 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
                   placeholder="Type your health concern..."
                   className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={2}
+                  disabled={isLoading}
                 />
               </div>
               <button
@@ -214,6 +257,13 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
                 <Send className="w-5 h-5" />
               </button>
             </div>
+            
+            {/* Session Info */}
+            {sessionId && (
+              <div className="mt-2 text-xs text-gray-400 text-center">
+                Session: {sessionId.substring(0, 8)}...
+              </div>
+            )}
           </div>
         </>
       )}
@@ -221,4 +271,4 @@ const ChatWindow = ({ isMinimized, onMinimize, onClose }) => {
   );
 };
 
-export default ChatWindow;
+export default ChatWindowStream;

@@ -118,7 +118,7 @@ export default function DoctorSignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Join as Doctor</CardTitle>
           <CardDescription className="text-center">
-            Sign up to provide healthcare services with Sehat Saathi
+            Sign up to provide healthcare services with NabhaCare
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

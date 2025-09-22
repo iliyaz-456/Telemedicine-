@@ -61,7 +61,7 @@ export default function ForDoctorsSection() {
           <div className="text-center">
             <h3 className="text-2xl font-bold mb-4">Ready to Make a Difference?</h3>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Join hundreds of doctors who are already using Sehat Saathi to provide quality healthcare to rural
+              Join hundreds of doctors who are already using NabhaCare to provide quality healthcare to rural
               communities. Flexible hours, competitive compensation, and the satisfaction of serving those who need it
               most.
             </p>

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TelemediConnect - Healthcare for All",
+  title: "NabhaCare - Healthcare for All",
   description: "Connecting patients, doctors, and healthcare workers through technology",
 };
 

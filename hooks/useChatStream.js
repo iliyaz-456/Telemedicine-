@@ -1,14 +1,15 @@
 import { useState, useCallback, useEffect } from 'react';
 
 /**
- * Custom hook for managing chat functionality with Gemini API
- * Handles API calls, state management, error handling, and MongoDB integration
+ * Enhanced chat hook with streaming support for real-time responses
+ * Handles streaming API calls, state management, error handling, and MongoDB integration
  */
-export const useChat = () => {
+export const useChatStream = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+  const [streamingMessage, setStreamingMessage] = useState('');
 
   // Initialize session ID on first use
   useEffect(() => {
@@ -18,7 +19,7 @@ export const useChat = () => {
   }, [sessionId]);
 
   /**
-   * Send a message to the Gemini API and handle the response
+   * Send a message with streaming response
    * @param {string} message - The user's message
    * @param {string} language - The detected or selected language
    */
@@ -36,6 +37,7 @@ export const useChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     setError(null);
+    setStreamingMessage('');
 
     try {
       // Prepare conversation history for context (only last 6 messages for efficiency)
@@ -44,8 +46,8 @@ export const useChat = () => {
         message: msg.message
       }));
 
-      // Call the backend API with session management
-      const response = await fetch('/api/chat', {
+      // Create streaming response
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,34 +60,69 @@ export const useChat = () => {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
-      if (data.success) {
-        // Update session ID if provided
-        if (data.sessionId && data.sessionId !== sessionId) {
-          setSessionId(data.sessionId);
+      // Handle streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      let currentSessionId = sessionId;
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'chunk') {
+                fullResponse += data.content;
+                setStreamingMessage(fullResponse);
+                
+                // Update session ID if provided
+                if (data.sessionId && data.sessionId !== currentSessionId) {
+                  currentSessionId = data.sessionId;
+                  setSessionId(data.sessionId);
+                }
+              } else if (data.type === 'complete') {
+                // Streaming complete, add final message
+                const botMessage = {
+                  id: Date.now() + 1,
+                  role: 'assistant',
+                  message: fullResponse,
+                  timestamp: new Date(),
+                  detectedLanguage: data.detectedLanguage
+                };
+
+                setMessages(prev => [...prev, botMessage]);
+                setStreamingMessage('');
+                
+                if (data.sessionId && data.sessionId !== currentSessionId) {
+                  setSessionId(data.sessionId);
+                }
+              } else if (data.type === 'error') {
+                throw new Error(data.error || 'Streaming error occurred');
+              }
+            } catch (parseError) {
+              console.error('Error parsing streaming data:', parseError);
+            }
+          }
         }
-
-        // Add bot response to the chat
-        const botMessage = {
-          id: Date.now() + 1,
-          role: 'assistant',
-          message: data.message,
-          timestamp: new Date(),
-          doctorSuggestion: data.doctorSuggestion,
-          detectedLanguage: data.detectedLanguage
-        };
-
-        setMessages(prev => [...prev, botMessage]);
-      } else {
-        throw new Error(data.error || 'Failed to get response');
       }
+
     } catch (err) {
-      console.error('Chat error:', err);
+      console.error('Streaming chat error:', err);
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
       
@@ -99,6 +136,7 @@ export const useChat = () => {
       };
 
       setMessages(prev => [...prev, errorBotMessage]);
+      setStreamingMessage('');
     } finally {
       setIsLoading(false);
     }
@@ -110,6 +148,7 @@ export const useChat = () => {
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
+    setStreamingMessage('');
     setSessionId(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   }, []);
 
@@ -147,6 +186,7 @@ export const useChat = () => {
     isLoading,
     error,
     sessionId,
+    streamingMessage,
     sendMessage,
     clearMessages,
     retryLastMessage

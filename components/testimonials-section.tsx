@@ -12,9 +12,9 @@ export default function TestimonialsSection() {
       name: "Rajinder Kaur",
       role: "Village Resident, Nabha",
       content:
-        "Sehat Saathi ne meri maa di jaan bachayi. Doctor ji ne phone te hi sahi ilaaj dasya te ASHA didi ne dawai ghar tak pahunchayi.",
+        "NabhaCare ne meri maa di jaan bachayi. Doctor ji ne phone te hi sahi ilaaj dasya te ASHA didi ne dawai ghar tak pahunchayi.",
       translation:
-        "Sehat Saathi saved my mother's life. The doctor gave the right treatment over the phone and ASHA didi delivered medicines to our home.",
+        "NabhaCare saved my mother's life. The doctor gave the right treatment over the phone and ASHA didi delivered medicines to our home.",
       rating: 5,
       image: "/elderly-punjabi-woman-smiling.jpg",
     },
@@ -22,7 +22,7 @@ export default function TestimonialsSection() {
       name: "Dr. Preet Singh",
       role: "General Physician",
       content:
-        "Working with Sehat Saathi allows me to reach patients who otherwise wouldn't have access to quality healthcare. The AI summaries save time and the ASHA workers provide excellent ground support.",
+        "Working with NabhaCare allows me to reach patients who otherwise wouldn't have access to quality healthcare. The AI summaries save time and the ASHA workers provide excellent ground support.",
       rating: 5,
       image: "/indian-male-doctor-in-white-coat.jpg",
     },
